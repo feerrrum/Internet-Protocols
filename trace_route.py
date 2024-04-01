@@ -6,7 +6,8 @@ import argparse
 IP_RE = re.compile(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
 
 
-def get_rout_ips(domain: str, max_hops: int):
+def get_route_ips(domain: str, max_hops: int):
+    """Returns list of ip addresses in route to a given destination"""
     ips = []
     with subprocess.Popen(["tracert", "-h", str(max_hops), domain],
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as tracer:
@@ -15,14 +16,15 @@ def get_rout_ips(domain: str, max_hops: int):
             if ip := IP_RE.search(hop):
                 ips.append(ip.group())
         if len(ips) < 2:
-            print("Unable to trace rout to that domain")
+            print("Unable to trace route to that domain")
             return
         ips.append(ips.pop(0))
 
     return ips
 
 
-def trace_location(ips: list[str]) -> None:
+def trace_route(ips: list[str]) -> None:
+    """Prints out info about given ip addresses"""
     result = requests.post("http://ip-api.com/batch", data=json.dumps(ips), timeout=100).json()
 
     for item in result:
@@ -33,12 +35,12 @@ def trace_location(ips: list[str]) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Traces rout to a given destination")
+    parser = argparse.ArgumentParser(description="Traces route to a given destination")
     parser.add_argument("--hops", action="store", type=int, default=30, help="max amount of hops")
     parser.add_argument("domain", action="store", help="destination")
     args = parser.parse_args()
 
-    trace_location(get_rout_ips(args.domain, args.hops))
+    trace_route(get_route_ips(args.domain, args.hops))
 
 
 if __name__ == "__main__":
