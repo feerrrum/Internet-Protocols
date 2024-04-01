@@ -22,7 +22,7 @@ def get_rout_ips(domain: str, max_hops: int):
     return ips
 
 
-def trace_location(ips: list[str]) -> None:
+def trace_rout(ips: list[str]) -> None:
     result = requests.post("http://ip-api.com/batch", data=json.dumps(ips), timeout=100).json()
 
     for item in result:
@@ -38,7 +38,7 @@ def main():
     parser.add_argument("domain", action="store", help="destination")
     args = parser.parse_args()
 
-    trace_location(get_rout_ips(args.domain, args.hops))
+    trace_rout(get_rout_ips(args.domain, args.hops))
 
 
 if __name__ == "__main__":
